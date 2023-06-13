@@ -1,0 +1,75 @@
+-- Pairing Pets Name and Owners Name
+SELECT pets.name AS Pets_Name, concat(owners.Name," ", owners.surname) AS Owner_Name FROM pets
+INNER JOIN owners ON 
+pets.OwnerID = owners.OwnerID;
+
+-- Top 5 Expensive Procedure Type
+SELECT ProcedureType, Description, Max(Price) AS Price_1 FROM proceduresdetails
+GROUP BY ProcedureType, Description
+ORDER BY Price_1 DESC
+LIMIT 5;
+
+-- Top 5 Oldest Pet
+SELECT PetID, Name, Kind, Gender, MAX(Age) AS Age_1 FROM pets
+GROUP BY PetID, Name, Kind, Gender
+ORDER BY Age_1 DESC
+Limit 5;
+
+-- Total Pets Per Kind
+SELECT Kind, Count(kind) AS Total FROM pets
+GROUP BY Kind;
+
+-- Grouping by Gender
+SELECT Kind, upper(gender) AS Gender, Count(Gender) AS Total_Gender
+FROM Pets
+GROUP BY Kind, Gender
+ORDER BY Kind;
+
+-- How Many Each Pets Get Procedure
+SELECT pets.PetID, pets.Name, procedureshistory.ProcedureType, 
+COUNT(procedureshistory.ProcedureType) AS Number_Of_Procedure
+FROM pets
+JOIN procedureshistory ON
+pets.PetID = procedureshistory.PetID
+GROUP BY pets.PetID, pets.Name, procedureshistory.ProcedureType
+ORDER BY Number_Of_Procedure DESC, Pets.Name;
+
+-- Find out which pets from this clinic had procedures performed
+SELECT distinct(pets.name), procedureshistory.ProcedureType FROM pets
+INNER JOIN procedureshistory ON
+pets.PetID = procedureshistory.PetID
+INNER JOIN proceduresdetails ON
+procedureshistory.ProcedureSubCode = proceduresdetails.ProcedureSubCode
+ORDER BY pets.name;
+
+-- Match up all procedures performed to their descriptions
+SELECT distinct(pets.name), procedureshistory.ProcedureType, proceduresdetails.Description FROM pets
+INNER JOIN procedureshistory ON
+pets.PetID = procedureshistory.PetID
+INNER JOIN proceduresdetails ON
+procedureshistory.ProcedureSubCode = proceduresdetails.ProcedureSubCode
+ORDER BY pets.name;
+
+-- Extract a table of individual costs (procedure prices) incurred by owners of pets
+-- from the clinic in question (this table should have owner and procedure price side by side)
+SELECT concat(owners.name," ",owners.Surname) AS Owner_Names, proceduresdetails.price, procedureshistory.ProcedureType FROM owners
+INNER JOIN pets ON
+owners.OwnerID = pets.OwnerID
+INNER JOIN procedureshistory ON
+pets.PetID = procedureshistory.PetID
+INNER JOIN proceduresdetails ON
+procedureshistory.ProcedureSubCode = proceduresdetails.ProcedureSubCode;
+
+-- Total Costs Per Owners & Pets
+SELECT CONCAT(owners.name," ",owners.surname) AS Owner_Names, pets.Name AS Pet_Names,
+SUM(proceduresdetails.Price) AS Total_Costs
+FROM proceduresdetails
+INNER JOIN procedureshistory ON
+proceduresdetails.ProcedureSubCode = procedureshistory.ProcedureSubCode
+INNER JOIN pets ON
+procedureshistory.PetID = pets.PetID
+INNER JOIN owners ON 
+pets.OwnerID = owners.OwnerID
+group by Owner_Names, Pet_Names
+ORDER BY Owner_names;
+
